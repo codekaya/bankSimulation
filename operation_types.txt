@@ -1,0 +1,5 @@
+Money_Order	0.2
+EFT	15.6
+Deposit	0
+Withdraw	0.9
+Loan_Application	20.8
