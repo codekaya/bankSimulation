@@ -192,7 +192,8 @@ void readTransactions(FILE *file,branch **headBranch,operation_type** headOptype
 		fscanf(file,"%d %d %d %f",&branchNumber, &customerID, &opType, &amount);
 		for(i=0;i<branchNumber-1;++i){ tempBranch = tempBranch->nextb; }
 		tempCustomer = tempBranch->custs;
-		for(j=0;i<customerID-1;++i){ tempCustomer = tempCustomer->nextc; }
+		//for(j=0;i<customerID-1;++i){ tempCustomer = tempCustomer->nextc; }
+		while(tempCustomer->cno!=customerID){ tempCustomer = tempCustomer->nextc;}
 		while(tempOptype->optnum!=opType){ tempOptype = tempOptype->nextopt;}
 		//printf("%s %s %d\n",tempBranch->bname,tempCustomer->fname,tempOptype->optnum);
 		transaction* newNode = (transaction*)malloc(sizeof(transaction));
@@ -263,21 +264,24 @@ void printPaidCommission(branch **headBranch,operation_type** headOptype) {
 	while(tempBranch!=NULL){
 		if(tempBranch->custs!=NULL){
 			tempCustomer = tempBranch->custs;
-			printf("BRANCH : %d %s \n\n",tempBranch->bno,tempBranch->bname);
+			printf("BRANCH : %d %s \n",tempBranch->bno,tempBranch->bname);
 			while(tempCustomer!=NULL){
 					if(tempCustomer->trans!=NULL){
-						printf("-->cust id %d : %s %s\n",tempCustomer->cno,tempCustomer->fname,tempCustomer->lname);
+						printf("\n-->cust id %d : %s %s\n",tempCustomer->cno,tempCustomer->fname,tempCustomer->lname);
 		        		tempTrans = tempCustomer->trans;
 		        		while(tempTrans!=NULL){
-		        			totalCom+=tempTrans->amount;
-		        			printf("-- tno %d optype %d commission rate  amount %.2f\n",tempTrans->tno,tempTrans->optype,tempTrans->amount);
+		        			tempOptype = *headOptype;
+		        			while(tempOptype->optnum!=tempTrans->optype){ tempOptype = tempOptype->nextopt; }
+		        			totalCom+=tempTrans->amount*(tempOptype->commission/100); 
+		        			printf("  -- tno %d optype %d commission rate %.1f amount %.2f paid commission %.2f total commission %.2f\n",
+							tempTrans->tno,tempTrans->optype,tempOptype->commission,tempTrans->amount,(tempTrans->amount*(tempOptype->commission/100)),totalCom);
 		        			tempTrans = tempTrans->nexttr;
 						}
-						printf("** paid commission %.2f",totalCom);
+						printf("  ** paid commission %.2f\n",totalCom);
 						tempCustomer = tempCustomer->nextc;
 					}
 					else{
-						printf("-->cust id %d : %s %s\n",tempCustomer->cno,tempCustomer->fname,tempCustomer->lname);
+						printf("\n-->cust id %d : %s %s\n",tempCustomer->cno,tempCustomer->fname,tempCustomer->lname);
 						printf("  --(customer has no transaction)\n  **paid commission 0.00\n");
 						tempCustomer = tempCustomer->nextc;
 					}
@@ -285,7 +289,7 @@ void printPaidCommission(branch **headBranch,operation_type** headOptype) {
 			tempBranch = tempBranch->nextb;
 		}
 		else{
-			printf("BRANCH : %d %s \n\n",tempBranch->bno,tempBranch->bname);
+			printf("BRANCH : %d %s \n",tempBranch->bno,tempBranch->bname);
 			tempBranch = tempBranch->nextb;
 		}
 	}
